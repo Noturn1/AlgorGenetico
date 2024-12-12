@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use('TkAgg') # 
+matplotlib.use('TkAgg') 
 
 # Define função de otimização
 def funcao_objetivo(x, y):
     return x**2 + y**2 + (3*x + 4*y - 26)**2
-
+ 
 # Codificação e decodificação binária
 def binario_para_decimal(binario, limite_inferior, limite_superior, precisao=3):
     valor_inteiro = int(binario[1:], 2)  # Para ignorar o bit de sinal
@@ -63,8 +63,8 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_cruzamento, taxa_mu
         fitness_medio_por_geracao.append(np.mean(fitness))
 
         # Elitismo
-        elite_indices = np.argsort(fitness)[:2]
-        elite = [populacao[i] for i in elite_indices]
+        elite_index = np.argmin(fitness)  # Seleciona o índice do melhor indivíduo
+        elite = populacao[elite_index]
 
         # Seleção e cruzamento
         selecionados = selecao_ranking(populacao, fitness)
@@ -79,9 +79,8 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_cruzamento, taxa_mu
         # Mutação
         populacao = [mutacao(individuo, taxa_mutacao) for individuo in nova_populacao]
 
-        # Substituir os piores indivíduos pela elite
-        populacao[np.argmax(fitness)] = elite[0]
-        populacao[np.argsort(fitness)[-2]] = elite[1]
+        # Substituir o pior indivíduo pela elite
+        populacao[np.argmax(fitness)] = elite
     
         # Gráfico da geração atual
         plt.figure(figsize=(6,4))
