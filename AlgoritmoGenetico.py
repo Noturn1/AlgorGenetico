@@ -1,5 +1,7 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use('TkAgg') # 
 
 # Define função de otimização
 def funcao_objetivo(x, y):
@@ -32,8 +34,8 @@ def avaliar_populacao(populacao, bits):
 # Seleção por ranking
 def selecao_ranking(populacao, fitness):
     ranking = np.argsort(fitness)
-    probabilidades = np.arange(1, len(fitness) + 1) / sum(range(1, len(fitness) + 1))
-    selecionados = np.random.choice(populacao, size=len(populacao), p=probabilidades)
+    probabilidades = np.arange(len(fitness), 0, -1) / sum(range(1, len(fitness) + 1))
+    selecionados = np.random.choice(populacao, size=len(populacao), p=probabilidades[ranking])
     return selecionados
 
 # Cruzamento de dois pontos
@@ -61,7 +63,8 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_cruzamento, taxa_mu
         fitness_medio_por_geracao.append(np.mean(fitness))
 
         # Elitismo
-        elite = populacao[np.argmin(fitness)]
+        elite_indices = np.argsort(fitness)[:2]
+        elite = [populacao[i] for i in elite_indices]
 
         # Seleção e cruzamento
         selecionados = selecao_ranking(populacao, fitness)
@@ -76,19 +79,22 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_cruzamento, taxa_mu
         # Mutação
         populacao = [mutacao(individuo, taxa_mutacao) for individuo in nova_populacao]
 
-        # Substituir pior indivíduo pela elite
-        populacao[np.argmax(fitness)] = elite
+        # Substituir os piores indivíduos pela elite
+        populacao[np.argmax(fitness)] = elite[0]
+        populacao[np.argsort(fitness)[-2]] = elite[1]
     
         # Gráfico da geração atual
         plt.figure(figsize=(6,4))
-        x_vals = [binario_para_decimal(ind[:bits//2], 0, 10) for ind in populacao]
-        y_vals = [binario_para_decimal(ind[bits//2:], 0, 20) for ind in populacao]
+        x_vals = [binario_para_decimal(str(ind[:bits//2]), 0, 10) for ind in populacao]
+        y_vals = [binario_para_decimal(str(ind[bits//2:]), 0, 20) for ind in populacao]
         plt.scatter(x_vals, y_vals, c='blue', label='Indivíduos')
         plt.xlabel('x')
         plt.ylabel('y')
         plt.title(f'Geração {geracao + 1}')
         plt.legend()
-        plt.show()
+        plt.show(block=False)
+        plt.pause(1)
+        plt.close()
 
     # Gráfico do fitness médio
     plt.figure(figsize=(8, 5))
@@ -98,13 +104,14 @@ def algoritmo_genetico(tamanho_populacao, num_geracoes, taxa_cruzamento, taxa_mu
     plt.title('Convergência do Algoritmo Genético')
     plt.grid()
     plt.show()
+    plt.close()
 
 # Parâmetros do algoritmo
 algoritmo_genetico(
-    tamanho_populacao=20,
-    num_geracoes=50,
+    tamanho_populacao=50,
+    num_geracoes=300,
     taxa_cruzamento=0.8,
-    taxa_mutacao=0.01,
+    taxa_mutacao=0.0075,
 )
             
 
